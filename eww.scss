@@ -1,0 +1,74 @@
+.fixed-text {
+    padding-right: 20px;
+    // font-weight: 500;
+    // font-weight: bold;
+    font-family: Cascadia Code PL;
+}
+
+.cpuindicator {
+    opacity: 0.8;
+}
+.cpuindicator trough {
+    min-width: 8px;
+    min-height: 1px;
+    margin: 0px;
+    background-color: rgba(0,0,0,0);
+    border: 0;
+}
+
+.cpuindicator trough progress {
+    background-color: #999999;
+    border-color: #999999;
+}
+
+.cpuindicator.active trough progress {
+    background-color: #0099CC;
+    border-color: #0099CC;
+}
+
+.cpuindicator.max trough progress {
+    background-color: #CC3333;
+    border-color: #CC3333;
+}
+
+.date {
+    font-weight: 500;
+}
+
+.center-box {
+    // background-color: rgba(33,33,33,0.5)
+    font-family: Roboto;
+    font-weight: 500;
+    font-size: 14px;
+    color: white;
+}
+
+window {
+    background-color: rgba(0,0,0,.5);
+}
+
+.network {
+    font-size: 11px;
+    font-weight: bold;
+    text-shadow: 0px 0px 2px #000000;
+    margin-right: 20px;
+    min-width: 50px;
+}
+
+.network .active {
+    color: #33CCFF;
+}
+
+.network .max {
+    color: #FF6666;
+}
+
+.memory {
+    font-weight: 500;
+    margin: 0 10px;
+}
+.memory .title {
+    font-size: 10px;
+}
+.memory .value {
+}

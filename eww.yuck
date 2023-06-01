@@ -1,0 +1,176 @@
+;; things that I want
+; - clock - 24 hr time
+; - notifications?
+
+; - ram usage
+; - CPU per core
+; - load average
+; - network usage
+; - dock!
+; - GPU & CPU temp
+
+; (systray :pack-direction "rtl")
+
+
+(defvar time-visible false)   ; for :run-while property of below variable
+                              ; when this turns true, the polling starts and
+                              ; var gets updated with given interval
+
+(defpoll time :interval "1s"
+              :run-while time-visible   ; optional, defaults to 'true'
+  `date +"%a  %Y-%m-%d %H:%M:%S"`)
+
+(defpoll load :interval "1s" `awk '{print $1" "$2" "$3}' /proc/loadavg`)
+
+(defwidget date-time [?text name]
+  (box :orientation "horizontal"
+       :halign "end"
+       :class "fixed-text date"
+
+    time))
+
+(deflisten current-sink
+  `./scripts/poll_default_sink.sh`)
+
+(deflisten current-sink-vol
+  `./scripts/poll_default_sink_vol.sh`)
+
+(defwidget loadavg []
+  (box :orientation "horizontal"
+       :halign "end"
+       :class "fixed-text"
+   ;(systray :pack-direction "rtl") 
+    load))
+
+(defwidget cpu-indicator [value]
+  (progress
+    :value value
+    :orientation "v"
+    ;:style "min-width: 8px; min-height: 1px; margin: 0px; color: #FF0000;"
+    ;:style "min-width: 8px; min-height: 1px; margin: 0px; color: #FF0000;"
+    :class "cpuindicator ${(value < 40 ? "" : (value > 90 ? "max" : "active"))}"
+    :flipped true))
+
+(defwidget net-speed [value icon]
+  (box
+   :halign "start"
+   :space-evenly false
+   :class "${(value < 100 ? "" : (value > 1000 ? "max" : "active"))}"
+   "${icon} ${round(value, 0)}"))
+
+(defwidget labeled-box [value name]
+ (box
+  :halign "center"
+  :space-evenly false
+  :class "memory"
+  :orientation "v"
+  (box
+   :halign "center"
+   :class "title"
+   "${name}")
+  (box
+   :halign "center"
+   :valign "top"
+   :class "value"
+   "${value}")
+  )
+)
+
+(defwindow example
+ :monitor 0
+ :geometry (geometry
+   :x "0%"
+   :y "0px"
+   :width "100%"
+   :height "30px"
+   :anchor "top center")
+ :stacking "fg"
+ :windowtype "dock"
+ :wm-ignore false
+ (box
+  :halign "end"
+  :space-evenly false
+ :class "center-box"
+
+ ;(overlay
+ ;:style "min-width: 100px; margin-right: 20px; font-family: Roboto; font-weight: bold; font-size: 14px;"
+ ;(circular-progress
+ ; :value 100
+ ; :height 30
+ ; :width 30
+ ; :thickness 10
+ ; :style "color: #666666;"
+ ; )
+ ;"10%"
+ ;)
+
+ "${current-sink}"
+
+ (box
+  :style "min-width: 200px; margin-right: 20px"
+  (scale
+  :value "${current-sink-vol}"
+  :onchange "pactl set-sink-volume @DEFAULT_SINK@ {}%"
+  )
+  )
+
+ (labeled-box
+  :value "${round(EWW_TEMPS["AMDGPU_JUNCTION"], 0)}°"
+  :name "GPU")
+
+ (labeled-box
+  :value "${round(EWW_TEMPS["K10TEMP_TCCD1"], 0)}°"
+  :name "CPU")
+
+ (labeled-box
+  :value "${round(EWW_RAM["used_mem_perc"], 0)}%"
+  :name "RAM")
+
+
+ (box
+ :style "min-width: 200px; margin-left: 30px; margin-right: 10px;"
+  (graph
+  :value "${EWW_NET["enp11s0f3u2u1u2"]["NET_DOWN"]}"
+  :dynamic true
+  :style "color: rgba(200,200,200,0.8);"
+  :thickness "1.5"
+  :time-range "1m"
+  ))
+
+ (box
+  :halign "start"
+  :space-evenly false
+  :class "network"
+  :orientation "v"
+  :style "margin-top: 2px;"
+  (net-speed
+   :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_DOWN"]/1024, 2)}"
+   :icon "󰁅")
+  (net-speed
+   :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_UP"]/1024, 2)}"
+   :icon "󰁝"))
+
+
+  (loadavg)
+
+  (box
+   :halign "end"
+   :style "margin-right: 20px"
+   (cpu-indicator :value "${EWW_CPU["cores"][0]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][1]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][2]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][3]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][4]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][5]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][6]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][7]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][8]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][9]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][10]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][11]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][12]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][13]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][14]["usage"]}")
+   (cpu-indicator :value "${EWW_CPU["cores"][15]["usage"]}"))
+  (date-time :text "hi" :name "Richard")))
+
