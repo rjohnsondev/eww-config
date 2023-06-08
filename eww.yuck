@@ -20,12 +20,17 @@
               :run-while time-visible   ; optional, defaults to 'true'
   `date +"%a  %Y-%m-%d %H:%M:%S"`)
 
-(defpoll load :interval "1s" `awk '{print $1" "$2" "$3}' /proc/loadavg`)
+;(defpoll load :interval "1s" `awk '{print $1" "$2" "$3}' /proc/loadavg`)
+(defpoll load
+  :interval "1s"
+  :initial "0 0 0 0/0 0"
+  `cat /proc/loadavg`
+)
 
-(defwidget date-time [?text name]
+(defwidget date-time []
   (box :orientation "horizontal"
        :halign "end"
-       :class "fixed-text date"
+       :class "date"
 
     time))
 
@@ -35,35 +40,56 @@
 (deflisten current-sink-vol
   `./scripts/poll_default_sink_vol.sh`)
 
+(defwidget loadavg-part [part active max]
+  (box
+   :halign "center"
+   :valign "top"
+    :class "loadavg-part ${(captures(load, "(.*?) (.*?) (.*?) (.*?) .*")[0][part] < active ? "" : (captures(load, "(.*?) (.*?) (.*?) (.*?) .*")[0][part] > max ? "max" : "active"))}"
+    "${captures(load, "(.*?) (.*?) (.*?) (.*?) .*")[0][part]}"
+    ))
+
+
 (defwidget loadavg []
+ (box
+  :halign "center"
+  :valign "center"
+  :space-evenly false
+  :orientation "v"
+       :class "loadavg-box"
+  (box
+   :halign "center"
+   :class "title"
+   :valign "bottom"
+   "LOAD AVG")
   (box :orientation "horizontal"
        :halign "end"
-       :class "fixed-text"
    ;(systray :pack-direction "rtl") 
-    load))
+   (loadavg-part :part 1 :active 2.0 :max 6.0)
+   (loadavg-part :part 2 :active 1.0 :max 3.0)
+   (loadavg-part :part 3 :active 1.0 :max 2.0)
+    )))
 
 (defwidget cpu-indicator [value]
   (progress
     :value value
     :orientation "v"
-    ;:style "min-width: 8px; min-height: 1px; margin: 0px; color: #FF0000;"
-    ;:style "min-width: 8px; min-height: 1px; margin: 0px; color: #FF0000;"
     :class "cpuindicator ${(value < 40 ? "" : (value > 90 ? "max" : "active"))}"
     :flipped true))
 
 (defwidget net-speed [value icon]
   (box
-   :halign "start"
+   :halign "end"
    :space-evenly false
    :class "${(value < 100 ? "" : (value > 1000 ? "max" : "active"))}"
-   "${icon} ${round(value, 0)}"))
+   "${round(value, 0)} KBs ${icon}"))
 
-(defwidget labeled-box [value name]
+(defwidget labeled-box [value unit name active max]
  (box
   :halign "center"
+  :valign "center"
   :space-evenly false
-  :class "memory"
   :orientation "v"
+  :class "labeled"
   (box
    :halign "center"
    :class "title"
@@ -72,7 +98,8 @@
    :halign "center"
    :valign "top"
    :class "value"
-   "${value}")
+   :class "${(value < active ? "" : (value > max ? "max" : "active"))}"
+   "${value}${unit}")
   )
 )
 
@@ -115,27 +142,36 @@
   )
 
  (labeled-box
-  :value "${round(EWW_TEMPS["AMDGPU_JUNCTION"], 0)}°"
-  :name "GPU")
+  :value "${round(EWW_TEMPS["AMDGPU_JUNCTION"], 0)}"
+  :unit "°"
+  :name "GPU"
+  :active "60"
+  :max "85")
 
  (labeled-box
-  :value "${round(EWW_TEMPS["K10TEMP_TCCD1"], 0)}°"
-  :name "CPU")
+  :value "${round(EWW_TEMPS["K10TEMP_TCCD1"], 0)}"
+  :unit "°"
+  :name "CPU"
+  :active "70"
+  :max "85")
 
  (labeled-box
-  :value "${round(EWW_RAM["used_mem_perc"], 0)}%"
-  :name "RAM")
+  :value "${round(EWW_RAM["used_mem_perc"], 0)}"
+  :unit "%"
+  :name "RAM"
+  :active "40"
+  :max "70")
 
 
- (box
- :style "min-width: 200px; margin-left: 30px; margin-right: 10px;"
-  (graph
-  :value "${EWW_NET["enp11s0f3u2u1u2"]["NET_DOWN"]}"
-  :dynamic true
-  :style "color: rgba(200,200,200,0.8);"
-  :thickness "1.5"
-  :time-range "1m"
-  ))
+ ;(box
+ ;:style "min-width: 200px; margin-left: 30px; margin-right: 10px;"
+ ; (graph
+ ; :value "${EWW_NET["enp11s0f3u2u1u2"]["NET_DOWN"]}"
+ ; :dynamic true
+ ; :style "color: rgba(200,200,200,0.8);"
+ ; :thickness "1.5"
+ ; :time-range "1m"
+ ; ))
 
  (box
   :halign "start"
@@ -144,11 +180,12 @@
   :orientation "v"
   :style "margin-top: 2px;"
   (net-speed
+   :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_UP"]/1024, 2)}"
+   :icon "󰁝")
+  (net-speed
    :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_DOWN"]/1024, 2)}"
    :icon "󰁅")
-  (net-speed
-   :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_UP"]/1024, 2)}"
-   :icon "󰁝"))
+  )
 
 
   (loadavg)
@@ -172,5 +209,7 @@
    (cpu-indicator :value "${EWW_CPU["cores"][13]["usage"]}")
    (cpu-indicator :value "${EWW_CPU["cores"][14]["usage"]}")
    (cpu-indicator :value "${EWW_CPU["cores"][15]["usage"]}"))
-  (date-time :text "hi" :name "Richard")))
+  (date-time)
+
+  ))
 

@@ -1,5 +1,4 @@
 .fixed-text {
-    padding-right: 20px;
     // font-weight: 500;
     // font-weight: bold;
     font-family: Cascadia Code PL;
@@ -32,7 +31,7 @@
 }
 
 .date {
-    font-weight: 500;
+    padding-right: 20px;
 }
 
 .center-box {
@@ -51,7 +50,7 @@ window {
     font-size: 11px;
     font-weight: bold;
     text-shadow: 0px 0px 2px #000000;
-    margin-right: 20px;
+    margin: 0px 10px;
     min-width: 50px;
 }
 
@@ -63,12 +62,39 @@ window {
     color: #FF6666;
 }
 
-.memory {
+.labeled {
     font-weight: 500;
+    text-shadow: 0px 0px 2px #000000;
     margin: 0 10px;
 }
-.memory .title {
-    font-size: 10px;
+.labeled .title {
+    font-weight: 600;
+    font-size: 9px;
 }
-.memory .value {
+.labeled .active {
+    color: #33CCFF;
+}
+.labeled .max {
+    color: #FF6666;
+    text-shadow: 0px 0px 5px #CC0000;
+}
+
+.loadavg-box {
+    font-weight: 500;
+    text-shadow: 0px 0px 2px #000000;
+    margin: 0 10px;
+}
+.loadavg-box .title {
+    font-weight: 600;
+    font-size: 9px;
+}
+.loadavg-box .loadavg-part {
+    margin: 0px 5px;
+}
+.loadavg-box .active {
+    color: #33CCFF;
+}
+.loadavg-box .max {
+    color: #FF6666;
+    text-shadow: 0px 0px 5px #CC0000;
 }
