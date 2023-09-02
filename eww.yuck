@@ -18,7 +18,7 @@
 
 (defpoll time :interval "1s"
               :run-while time-visible   ; optional, defaults to 'true'
-  `date +"%a  %Y-%m-%d %H:%M:%S"`)
+  `date +"%a\\n%Y-%m-%d\\n%H:%M:%S"`)
 
 ;(defpoll load :interval "1s" `awk '{print $1" "$2" "$3}' /proc/loadavg`)
 (defpoll load
@@ -29,7 +29,7 @@
 
 (defwidget date-time []
   (box :orientation "horizontal"
-       :halign "end"
+       :halign "center"
        :class "date"
 
     time))
@@ -61,8 +61,8 @@
    :class "title"
    :valign "bottom"
    "LOAD AVG")
-  (box :orientation "horizontal"
-       :halign "end"
+  (box :orientation "v"
+       :halign "center"
    ;(systray :pack-direction "rtl") 
    (loadavg-part :part 1 :active 2.0 :max 6.0)
    (loadavg-part :part 2 :active 1.0 :max 3.0)
@@ -73,12 +73,13 @@
   (progress
     :value value
     :orientation "v"
+    :halign "center"
     :class "cpuindicator ${(value < 40 ? "" : (value > 90 ? "max" : "active"))}"
     :flipped true))
 
 (defwidget net-speed [value icon]
   (box
-   :halign "end"
+   :halign "center"
    :space-evenly false
    :class "${(value < 100 ? "" : (value > 1000 ? "max" : "active"))}"
    "${round(value, 0)} KBs ${icon}"))
@@ -106,18 +107,19 @@
 (defwindow example
  :monitor 0
  :geometry (geometry
-   :x "0%"
-   :y "0px"
-   :width "100%"
-   :height "30px"
-   :anchor "top center")
+   :x "30px"
+   :y "10px"
+   :width "100px"
+   :height "520px"
+   :anchor "center right")
  :stacking "fg"
  :windowtype "dock"
  :wm-ignore false
  (box
   :halign "end"
   :space-evenly false
- :class "center-box"
+  :class "center-box"
+ :orientation "vertical"
 
  ;(overlay
  ;:style "min-width: 100px; margin-right: 20px; font-family: Roboto; font-weight: bold; font-size: 14px;"
@@ -131,22 +133,27 @@
  ;"10%"
  ;)
 
- "${current-sink}"
-
  (box
-  :style "min-width: 200px; margin-right: 20px"
+  :style "min-height: 100px;padding-top: 20px;"
+    
+  :orientation "vertical"
   (scale
   :value "${current-sink-vol}"
+  :orientation "vertical"
+  :flipped true
   :onchange "pactl set-sink-volume @DEFAULT_SINK@ {}%"
   )
   )
+
+ "${current-sink}"
 
  (labeled-box
   :value "${round(EWW_TEMPS["AMDGPU_JUNCTION"], 0)}"
   :unit "°"
   :name "GPU"
   :active "60"
-  :max "85")
+  :max "85"
+  )
 
  (labeled-box
   :value "${round(EWW_TEMPS["K10TEMP_TCCD1"], 0)}"
@@ -174,16 +181,16 @@
  ; ))
 
  (box
-  :halign "start"
+  :halign "center"
   :space-evenly false
   :class "network"
   :orientation "v"
-  :style "margin-top: 2px;"
+  :style "margin-top: 12px; margin-bottom: 12px;"
   (net-speed
-   :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_UP"]/1024, 2)}"
+   :value "${round(EWW_NET["enp11s0f3u1u1u2"]["NET_UP"]/1024, 2)}"
    :icon "󰁝")
   (net-speed
-   :value "${round(EWW_NET["enp11s0f3u2u1u2"]["NET_DOWN"]/1024, 2)}"
+   :value "${round(EWW_NET["enp11s0f3u1u1u2"]["NET_DOWN"]/1024, 2)}"
    :icon "󰁅")
   )
 
@@ -192,7 +199,7 @@
 
   (box
    :halign "end"
-   :style "margin-right: 20px"
+   :style "margin-top: 20px"
    (cpu-indicator :value "${EWW_CPU["cores"][0]["usage"]}")
    (cpu-indicator :value "${EWW_CPU["cores"][1]["usage"]}")
    (cpu-indicator :value "${EWW_CPU["cores"][2]["usage"]}")
@@ -209,6 +216,7 @@
    (cpu-indicator :value "${EWW_CPU["cores"][13]["usage"]}")
    (cpu-indicator :value "${EWW_CPU["cores"][14]["usage"]}")
    (cpu-indicator :value "${EWW_CPU["cores"][15]["usage"]}"))
+
   (date-time)
 
   ))

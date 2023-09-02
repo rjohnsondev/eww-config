@@ -8,8 +8,8 @@
     opacity: 0.8;
 }
 .cpuindicator trough {
-    min-width: 8px;
-    min-height: 1px;
+    // min-width: 5px;
+    min-height: 20px;
     margin: 0px;
     background-color: rgba(0,0,0,0);
     border: 0;
@@ -31,19 +31,20 @@
 }
 
 .date {
-    padding-right: 20px;
+    margin-top: 20px;
 }
 
 .center-box {
     // background-color: rgba(33,33,33,0.5)
     font-family: Roboto;
     font-weight: 500;
-    font-size: 14px;
-    color: white;
+    font-size: 13px;
+    color: #ccc;
 }
 
 window {
-    background-color: rgba(0,0,0,.5);
+    background-color: rgba(23,23,23,.3);
+    border-radius: 20px;
 }
 
 .network {
@@ -65,7 +66,7 @@ window {
 .labeled {
     font-weight: 500;
     text-shadow: 0px 0px 2px #000000;
-    margin: 0 10px;
+    margin: 10px 0px;
 }
 .labeled .title {
     font-weight: 600;
@@ -82,7 +83,8 @@ window {
 .loadavg-box {
     font-weight: 500;
     text-shadow: 0px 0px 2px #000000;
-    margin: 0 10px;
+    margin: 0 0px;
+    font-size: 11px;
 }
 .loadavg-box .title {
     font-weight: 600;
